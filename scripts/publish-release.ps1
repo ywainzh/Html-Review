@@ -16,15 +16,16 @@ if (git status --porcelain) {
   throw 'Commit all project changes before publishing.'
 }
 
-$latestReleaseOutput = gh release list --repo ywainzh/Html-Review --json tagName --limit 1
+$latestReleaseJson = gh release list --repo ywainzh/Html-Review --json tagName --limit 1 | Out-String
 if ($LASTEXITCODE -ne 0) {
   throw 'Failed to read GitHub Releases.'
 }
 
-$latestRelease = @($latestReleaseOutput | ConvertFrom-Json)
-if ($latestRelease.Count -eq 0) {
+$latestReleaseJson = $latestReleaseJson.Trim()
+if (-not $latestReleaseJson -or $latestReleaseJson -eq '[]') {
   $Tag = 'v0.0.1'
 } else {
+  $latestRelease = @(ConvertFrom-Json -InputObject $latestReleaseJson)
   if ($latestRelease[0].tagName -notmatch '^v0\.0\.(\d+)$') {
     throw "Latest GitHub Release tag must use v0.0.N: $($latestRelease[0].tagName)"
   }
