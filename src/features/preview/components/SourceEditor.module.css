@@ -1,0 +1,114 @@
+.page {
+  min-height: 100vh;
+  min-height: var(--app-height, 100dvh);
+  padding: calc(var(--safe-top) + var(--space-5))
+    max(var(--space-4), var(--safe-right))
+    calc(var(--safe-bottom) + var(--space-4))
+    max(var(--space-4), var(--safe-left));
+}
+
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: 960px;
+  min-height: calc(100vh - var(--safe-top) - var(--safe-bottom) - 40px);
+  min-height: calc(
+    var(--app-height, 100dvh) - var(--safe-top) - var(--safe-bottom) - 40px
+  );
+  margin-inline: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 40px;
+}
+
+.mark {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-mark);
+  background: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  line-height: 1.35;
+}
+
+.title:focus {
+  outline: none;
+}
+
+.form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.input {
+  display: block;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 240px;
+  padding: var(--space-5);
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  outline: none;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-code);
+  font-size: 16px;
+  line-height: 1.75;
+  tab-size: 2;
+  resize: none;
+  caret-color: var(--color-primary);
+  transition:
+    border-color var(--duration-feedback) ease,
+    box-shadow var(--duration-feedback) ease;
+}
+
+.input:focus {
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+@media (min-width: 768px) {
+  .page {
+    padding: calc(var(--safe-top) + var(--space-7))
+      max(var(--space-6), var(--safe-right))
+      calc(var(--safe-bottom) + var(--space-6))
+      max(var(--space-6), var(--safe-left));
+  }
+
+  .workspace {
+    gap: var(--space-6);
+    min-height: calc(100vh - var(--safe-top) - var(--safe-bottom) - 80px);
+    min-height: calc(
+      var(--app-height, 100dvh) - var(--safe-top) - var(--safe-bottom) - 80px
+    );
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .input {
+    padding: var(--space-6);
+  }
+}

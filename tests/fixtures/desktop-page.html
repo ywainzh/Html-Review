@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>桌面接口详情</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 32px;
+        background: #f1f5f9;
+        color: #182230;
+        font:
+          16px / 1.5 system-ui,
+          sans-serif;
+      }
+      .panel {
+        overflow: hidden;
+        border: 1px solid #d0d5dd;
+        border-radius: 12px;
+        background: white;
+      }
+      .toolbar,
+      .tabs,
+      .metrics {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+      .toolbar {
+        justify-content: space-between;
+        padding: 20px 24px;
+        border-bottom: 1px solid #d0d5dd;
+      }
+      button {
+        padding: 12px;
+        border: 0;
+        border-radius: 6px;
+        background: #eff6ff;
+        color: #2563eb;
+        font: inherit;
+      }
+      .metrics {
+        white-space: nowrap;
+      }
+      .content {
+        min-height: 1800px;
+        padding: 24px;
+      }
+      pre {
+        font: 16px / 1.75 monospace;
+      }
+      footer {
+        display: flex;
+        justify-content: flex-end;
+        padding: 24px;
+        border-top: 1px solid #d0d5dd;
+      }
+      #layout {
+        display: none;
+      }
+      @media (min-width: 1024px) {
+        #layout {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="panel">
+      <header class="toolbar">
+        <nav class="tabs" aria-label="接口详情">
+          <button>响应内容</button>
+          <button>响应头</button>
+          <button>实际请求参数</button>
+          <button>请求头</button>
+        </nav>
+        <div class="metrics">
+          <span>Status: 200 OK</span>
+          <span>Time: 124 ms</span>
+          <button id="count">执行 0</button>
+        </div>
+      </header>
+      <div class="content">
+        <h1 id="layout">桌面布局</h1>
+        <pre>
+{
+  "requestId": "preview-demo",
+  "response": {
+    "success": true,
+    "message": "请求成功"
+  }
+}</pre>
+      </div>
+      <footer><button id="bottom">页底操作</button></footer>
+    </section>
+    <script>
+      let count = 0;
+      const counter = document.querySelector('#count');
+      counter.onclick = () => {
+        counter.textContent = `执行 ${++count}`;
+      };
+      document.querySelector('#bottom').onclick = (event) => {
+        event.currentTarget.textContent = '操作完成';
+      };
+    </script>
+  </body>
+</html>

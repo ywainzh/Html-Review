@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.cache/
+coverage/
+playwright-report/
+test-results/
+*.local
+.env
+.env.*
+!.env.example
+.cf_token
+*.log
+.DS_Store
