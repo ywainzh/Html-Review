@@ -20,16 +20,6 @@ npm run preview
 
 构建产物位于 `dist/`，可部署到任意静态站点服务。运行时无需服务器 API 或环境变量。
 
-## 发布到 Oracle
-
-首次发布前，在 PowerShell 会话中提供 `GH_TOKEN_YWAINZH` 环境变量，并确认 `ssh oracle_vm` 可连接服务器。提交并推送 `main` 后，发布命令会运行检查和本机构建，在 GitHub 创建版本 Release 并上传静态站点压缩包，然后通过 SSH 触发服务器从公开 Release 拉包部署；应用文件不会从本机直接上传服务器。
-
-```powershell
-npm run deploy:release
-```
-
-版本号由 GitHub 最新 Release 自动递增：首次为 `v0.0.1`，之后为 `v0.0.2`、`v0.0.3`。服务器首次发布时会安装独立 Nginx 站点配置并申请 HTTPS 证书。服务器只运行现有 Nginx，部署脚本和站点文件均从 GitHub 获取，不需要在服务器安装 Node.js 或编译。
-
 ## 代码组织
 
 ```text

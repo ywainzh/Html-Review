@@ -39,7 +39,7 @@ if ($LASTEXITCODE -ne 0) {
 
 $archiveDirectory = Join-Path $projectRoot ".cache/releases/$Tag"
 New-Item -ItemType Directory -Path $archiveDirectory -Force | Out-Null
-$archivePath = Join-Path $archiveDirectory 'html-review.tar.gz'
+$archivePath = ".cache/releases/$Tag/html-review.tar.gz"
 
 tar.exe -czf $archivePath -C (Join-Path $projectRoot 'dist') .
 if ($LASTEXITCODE -ne 0) {
