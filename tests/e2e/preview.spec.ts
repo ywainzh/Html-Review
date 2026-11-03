@@ -10,7 +10,7 @@ const interactiveDocument = `<!doctype html>
 async function openPreview(page: Page, source = interactiveDocument) {
   await page.getByRole('textbox', { name: 'HTML 代码' }).fill(source);
   await page.getByRole('button', { name: '预览', exact: true }).click();
-  await expect(page.getByRole('button', { name: '返回编辑' })).toBeVisible();
+  await expect(page.getByRole('region', { name: '网页预览' })).toBeVisible();
   return page.frameLocator('iframe');
 }
 
@@ -27,6 +27,9 @@ test('starts empty and accepts pasted code without showing explanatory copy', as
   await expect(page.getByRole('heading', { name: 'HTML 预览' })).toBeVisible();
   await expect(input).toHaveValue('');
   await expect(preview).toBeDisabled();
+  await expect(
+    page.getByRole('button', { name: '清空', exact: true }),
+  ).toBeDisabled();
   await input.fill(' \n\t ');
   await expect(preview).toBeDisabled();
   await input.fill('');
@@ -41,6 +44,38 @@ test('starts empty and accepts pasted code without showing explanatory copy', as
   );
 });
 
+test('clears the source in one click so new code can be pasted right away', async ({
+  page,
+}) => {
+  const input = page.getByRole('textbox', { name: 'HTML 代码' });
+  const clear = page.getByRole('button', { name: '清空', exact: true });
+  const preview = page.getByRole('button', { name: '预览', exact: true });
+
+  await expect(clear).toBeDisabled();
+  await input.fill(interactiveDocument);
+  const clearBox = await clear.boundingBox();
+  const previewBox = await preview.boundingBox();
+  expect(clearBox?.width).toBe(previewBox?.width);
+  expect(clearBox?.height).toBe(previewBox?.height);
+  await expect(clear).toBeEnabled();
+  await clear.click();
+  await expect(input).toHaveValue('');
+  await expect(clear).toBeDisabled();
+  await expect(preview).toBeDisabled();
+  await expect(input).toBeFocused();
+
+  await page.keyboard.insertText('<h1>清空后粘贴</h1>');
+  await expect(input).toHaveValue('<h1>清空后粘贴</h1>');
+  await preview.click();
+  await expect(page.frameLocator('iframe').getByRole('heading')).toHaveText(
+    '清空后粘贴',
+  );
+  await page.goBack();
+  await clear.click();
+  await expect(input).toHaveValue('');
+  await expect(input).toBeFocused();
+});
+
 test('runs scripts and CSS, retains the source, and reruns a new snapshot', async ({
   page,
 }) => {
@@ -52,7 +87,7 @@ test('runs scripts and CSS, retains the source, and reruns a new snapshot', asyn
   );
   await frame.getByRole('button').click();
   await expect(frame.getByRole('button')).toHaveText('点击 1');
-  await page.getByRole('button', { name: '返回编辑' }).click();
+  await page.goBack();
   await expect(page.getByRole('textbox')).toHaveValue(interactiveDocument);
   await expect(page.getByRole('textbox')).not.toBeFocused();
   const freshFrame = await openPreview(
@@ -77,10 +112,10 @@ test('supports browser back and forward without storing source in history', asyn
   await expect(page.frameLocator('iframe').getByRole('heading')).toHaveText(
     '你好，HTML',
   );
-  await page.getByRole('button', { name: '返回编辑' }).click();
+  await page.goBack();
   await expect(page.getByRole('textbox')).toBeVisible();
   await openPreview(page, '<h1>再次预览</h1>');
-  await page.getByRole('button', { name: '返回编辑' }).click();
+  await page.goBack();
   await expect(page.getByRole('textbox')).toBeVisible();
 });
 
@@ -124,7 +159,7 @@ test('preserves selection and scrolling for large input with long lines', async 
   await expect(page.frameLocator('iframe').getByRole('heading')).toHaveText(
     '大段代码',
   );
-  await page.getByRole('button', { name: '返回编辑' }).click();
+  await page.goBack();
   await expect(input).toBeVisible();
   await expect
     .poll(() =>
@@ -139,18 +174,30 @@ test('preserves selection and scrolling for large input with long lines', async 
   await expect(input).toHaveValue(source);
 });
 
-test('returns to editing after navigation inside the preview', async ({
+test('returns to editing with browser back after navigating inside the preview', async ({
   page,
 }) => {
+  const childFrameUrl = () =>
+    page
+      .frames()
+      .find((item) => item !== page.mainFrame())
+      ?.url() ?? '';
   const frame = await openPreview(
     page,
     '<a href="#section">跳转</a><h1 id="section">页面内容</h1>',
   );
   await frame.getByRole('link', { name: '跳转' }).click();
-  await page.getByRole('button', { name: '返回编辑' }).click();
+  await expect.poll(childFrameUrl, { timeout: 15000 }).toContain('#section');
+  // 预览页内的跳转占用一步浏览器历史，第一次返回只撤销页面内跳转
+  await page.evaluate(() => history.back());
+  await expect
+    .poll(childFrameUrl, { timeout: 15000 })
+    .not.toContain('#section');
+  await expect(page.getByRole('region', { name: '网页预览' })).toBeVisible();
+  await page.evaluate(() => history.back());
   await expect(page.getByRole('textbox')).toBeVisible();
   await openPreview(page, '<h1>再次预览</h1>');
-  await page.getByRole('button', { name: '返回编辑' }).click();
+  await page.goBack();
   await expect(page.getByRole('textbox')).toBeVisible();
 });
 
@@ -214,7 +261,7 @@ test('isolates scripts from host DOM, storage, popups and top navigation', async
     'allow-scripts',
   );
   expect(context.pages()).toHaveLength(1);
-  await page.getByRole('button', { name: '返回编辑' }).click();
+  await page.goBack();
   await expect(page.getByRole('heading', { name: 'HTML 预览' })).toBeVisible();
 });
 
@@ -279,11 +326,15 @@ test('supports keyboard focus and reduced motion', async ({ page }) => {
   await input.focus();
   await page.keyboard.insertText('<h1>键盘预览</h1>');
   await page.keyboard.press('Tab');
+  await expect(
+    page.getByRole('button', { name: '清空', exact: true }),
+  ).toBeFocused();
+  await page.keyboard.press('Tab');
   const button = page.getByRole('button', { name: '预览', exact: true });
   await expect(button).toBeFocused();
   await expect(button).toHaveCSS('transition-duration', '0s');
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('button', { name: '返回编辑' })).toBeFocused();
-  await page.keyboard.press('Enter');
+  await expect(page.getByRole('region', { name: '网页预览' })).toBeFocused();
+  await page.keyboard.press('Escape');
   await expect(input).toBeVisible();
 });

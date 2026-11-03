@@ -11,7 +11,7 @@ async function openDesktopPreview(page: Page) {
   await page.goto('/');
   await page.getByRole('textbox').fill(desktopDocument);
   await page.getByRole('button', { name: '预览', exact: true }).click();
-  await expect(page.getByRole('button', { name: '返回编辑' })).toBeVisible();
+  await expect(page.getByRole('region', { name: '网页预览' })).toBeVisible();
   return page.frameLocator('iframe');
 }
 
@@ -66,14 +66,13 @@ test('uses a readable desktop layout inside the phone viewport', async ({
   });
 });
 
-test('reaches right-side controls and the page bottom while keeping the host toolbar fixed', async ({
+test('reaches right-side controls and the page bottom without moving the host page', async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const frame = await openDesktopPreview(page);
   const viewport = page.getByRole('region', { name: '网页预览' });
-  const back = page.getByRole('button', { name: '返回编辑' });
-  const toolbarBefore = await back.boundingBox();
+  const viewportBefore = await viewport.boundingBox();
 
   await viewport.evaluate((element) => {
     element.scrollLeft = element.scrollWidth;
@@ -108,7 +107,7 @@ test('reaches right-side controls and the page bottom while keeping the host too
     await frame.locator('body').evaluate(() => window.scrollY),
   ).toBeGreaterThan(1000);
   expect(await viewport.evaluate((element) => element.scrollTop)).toBe(0);
-  expect(await back.boundingBox()).toEqual(toolbarBefore);
+  expect(await viewport.boundingBox()).toEqual(viewportBefore);
   expect(
     await page.evaluate(() => ({
       x: scrollX,
@@ -145,7 +144,7 @@ test('preserves the running document during rotation and resets a new preview', 
     element.scrollLeft = 600;
   });
   await frame.locator('body').evaluate(() => window.scrollTo(0, 800));
-  await page.getByRole('button', { name: '返回编辑' }).click();
+  await page.goBack();
   await page.getByRole('button', { name: '预览', exact: true }).click();
   await expect(frame.getByRole('heading', { name: '桌面布局' })).toBeVisible();
   expect(await viewport.evaluate((element) => element.scrollLeft)).toBe(0);
@@ -180,7 +179,7 @@ test('chains native touch swipes from the iframe to the horizontal viewport', as
       .poll(() => frame.locator('body').evaluate(() => window.scrollY))
       .toBeGreaterThan(100);
     await expect(
-      page.getByRole('button', { name: '返回编辑' }),
+      page.getByRole('region', { name: '网页预览' }),
     ).toBeInViewport();
   } finally {
     await context.close();

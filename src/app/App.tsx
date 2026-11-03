@@ -20,7 +20,7 @@ export function App() {
         <PreviewPane
           key={snapshot.id}
           html={snapshot.document}
-          onBack={closePreview}
+          onExit={closePreview}
         />
       )}
     </>

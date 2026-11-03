@@ -58,6 +58,20 @@ export function SourceEditor({
     onPreview();
   }
 
+  function handleClear() {
+    const input = inputRef.current;
+    onChange('');
+    position.current = { start: 0, end: 0, top: 0, left: 0 };
+
+    if (input) {
+      input.scrollTop = 0;
+      input.scrollLeft = 0;
+      // 清空后立即聚焦，方便直接粘贴新代码
+      input.focus({ preventScroll: true });
+      input.setSelectionRange(0, 0);
+    }
+  }
+
   return (
     <main className={styles.page} hidden={!visible}>
       <div className={styles.workspace}>
@@ -87,10 +101,16 @@ export function SourceEditor({
             wrap="off"
             aria-label="HTML 代码"
           />
-          <Button type="submit" disabled={!value.trim()}>
-            <Icon name="play" />
-            预览
-          </Button>
+          <div className={styles.actions}>
+            <Button variant="secondary" onClick={handleClear} disabled={!value}>
+              <Icon name="trash" />
+              清空
+            </Button>
+            <Button type="submit" disabled={!value.trim()}>
+              <Icon name="play" />
+              预览
+            </Button>
+          </div>
         </form>
       </div>
     </main>

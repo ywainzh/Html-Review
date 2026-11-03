@@ -31,12 +31,22 @@
   color: var(--color-text);
 }
 
+.secondary {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
 @media (hover: hover) {
   .primary:hover:not(:disabled) {
     background: var(--color-primary-hover);
   }
 
   .plain:hover:not(:disabled) {
+    background: var(--color-background);
+  }
+
+  .secondary:hover:not(:disabled) {
     background: var(--color-background);
   }
 }
@@ -46,6 +56,10 @@
 }
 
 .plain:active:not(:disabled) {
+  background: var(--color-disabled-background);
+}
+
+.secondary:active:not(:disabled) {
   background: var(--color-disabled-background);
 }
 

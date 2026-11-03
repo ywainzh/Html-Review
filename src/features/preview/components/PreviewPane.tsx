@@ -1,33 +1,35 @@
 import { useEffect, useRef } from 'react';
-import { Button } from '../../../components/ui/Button';
-import { Icon } from '../../../components/ui/Icon';
+import type { KeyboardEvent } from 'react';
 import styles from './PreviewPane.module.css';
 
 interface PreviewPaneProps {
   html: string;
-  onBack: () => void;
+  onExit: () => void;
 }
 
-export function PreviewPane({ html, onBack }: PreviewPaneProps) {
-  const toolbarRef = useRef<HTMLElement>(null);
+export function PreviewPane({ html, onExit }: PreviewPaneProps) {
+  const viewportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    toolbarRef.current?.querySelector('button')?.focus({ preventScroll: true });
+    viewportRef.current?.focus({ preventScroll: true });
   }, []);
+
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== 'Escape') return;
+
+    event.preventDefault();
+    onExit();
+  }
 
   return (
     <main className={styles.preview}>
-      <header className={styles.toolbar} ref={toolbarRef}>
-        <Button variant="plain" onClick={onBack}>
-          <Icon name="back" />
-          返回编辑
-        </Button>
-      </header>
       <div
+        ref={viewportRef}
         className={styles.viewport}
         role="region"
         aria-label="网页预览"
         tabIndex={0}
+        onKeyDown={handleKeyDown}
       >
         <iframe
           className={styles.frame}

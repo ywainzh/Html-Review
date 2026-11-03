@@ -88,6 +88,15 @@
   box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
+.actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.actions > button {
+  flex: 1 1 0;
+}
+
 @media (min-width: 768px) {
   .page {
     padding: calc(var(--safe-top) + var(--space-7))
